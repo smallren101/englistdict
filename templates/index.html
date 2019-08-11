@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="/" method="POST">
+    <input type="text" name="ci" id="ci" value="{% if args%} {{ args }} {% endif %}">
+    <button type="submit">点击查询</button>
+</form>
+<div>
+    <ul>
+	{% if trans %}
+        {% for tran in trans %}
+        <li>{{ tran }}</li>
+        {% endfor %}
+		{% else %}
+		<li>没有查到 </li>
+		{% endif %}
+    </ul>
+</div>
+<div id="additional">
+	{% if additional %}
+    <p>
+        {{ additional }}
+    </p>
+	{% endif %}
+</div>
+<div id="pronounce">
+    {% if pronounce %}
+    <span id="doc">
+        {{ pronounce }}
+    </span>
+    <audio id="voice"></audio>
+    <p class="but">发音</p>
+    {% endif %}
+</div>
+
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var voice = document.getElementById('voice');
+        var doc = document.getElementById('ci').value;
+		console.log(doc);
+        voice.setAttribute('src','http://dict.youdao.com/dictvoice?audio='+doc);
+          $('.but').click(function() {
+            if (voice.paused) {
+                voice.play();
+            }
+        });
+     });
+</script>
+</html>
