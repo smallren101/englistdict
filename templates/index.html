@@ -6,50 +6,62 @@
 </head>
 <body>
 <form action="/" method="POST">
-    <input type="text" name="ci" id="ci" value="{% if args%} {{ args }} {% endif %}">
+    <input type="text" name="ci" id="ci" value="{% if args %} {{ args }} {% endif %}">
     <button type="submit">点击查询</button>
 </form>
+
 <div>
     <ul>
-	{% if trans %}
-        {% for tran in trans %}
-        <li>{{ tran }}</li>
-        {% endfor %}
-		{% else %}
-		<li>没有查到 </li>
-		{% endif %}
+        {% if trans %}
+            {% for tran in trans %}
+                <li>{{ tran }}</li>
+            {% endfor %}
+        {% else %}
+            <li>没有查到</li>
+        {% endif %}
     </ul>
 </div>
 <div id="additional">
-	{% if additional %}
-    <p>
-        {{ additional }}
-    </p>
-	{% endif %}
+    {% if additional %}
+        <p>
+            {{ additional }}
+        </p>
+    {% endif %}
 </div>
 <div id="pronounce">
     {% if pronounce %}
-    <span id="doc">
+        <span id="doc">
         {{ pronounce }}
     </span>
-    <audio id="voice"></audio>
-    <p class="but">发音</p>
+        <audio id="voice"></audio>
+        <p class="but">发音</p>
     {% endif %}
 </div>
-
+<div>
+    <ul>
+        {% if query %}
+            {% for tran in query %}
+                <li>{{ tran.args }}</li>
+                <li>{{ tran.trans }}</li>
+                <li>{{ tran.pronounce }}</li>
+                <li>{{ tran.additional }}</li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+</div>
 </body>
 <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         var voice = document.getElementById('voice');
         var doc = document.getElementById('ci').value;
-		console.log(doc);
-        voice.setAttribute('src','http://dict.youdao.com/dictvoice?audio='+doc);
-          $('.but').click(function() {
+        console.log(doc);
+        voice.setAttribute('src', 'http://dict.youdao.com/dictvoice?audio=' + doc);
+        $('.but').click(function () {
             if (voice.paused) {
                 voice.play();
             }
         });
-     });
+    });
 </script>
 </html>
