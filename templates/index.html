@@ -1,67 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
 <form action="/" method="POST">
-    <input type="text" name="ci" id="ci" value="{% if args %} {{ args }} {% endif %}">
+    <input type="text" name="ci" id="ci" value="{% if args%} {{ args }} {% endif %}">
     <button type="submit">点击查询</button>
 </form>
+<div></div>
+{#<div>#}
+{#    <ul>#}
+{#        {% if trans %}#}
+{#        {% for tran in trans %}#}
+{#        <li>{{ tran }}</li>#}
+{#        {% endfor %}#}
+{#        {% else %}#}
+{#        <li>没有查到</li>#}
+{#        {% endif %}#}
+{#    </ul>#}
+{#</div>#}
+{#<div id="additional">#}
+{#    {% if additional %}#}
+{#    <p>#}
+{#        {{ additional }}#}
+{#    </p>#}
+{#    {% endif %}#}
+{#</div>#}
+{#<div id="pronounce">#}
+{#    {% if pronounce %}#}
+{#    <span id="doc">#}
+{#        {{ pronounce }}#}
+{#    </span>#}
+{#    <audio id="voice"></audio>#}
+{##}
+{#    <button class="but">发音</button>#}
+{#    {% endif %}#}
+{#</div>#}
+<div>
+    {% if result %}
+    <table border="1">
+        <tr>
+            <th>单词</th>
+            <th>意思</th>
+            <th>音标</th>
+            <th>其他</th>
+            <th>发音</th>
+        </tr>
+        {% for res in result %}
+        <tr>
+            <td>{{res.args}}</td>
+            <td>{{res.trans}}</td>
+            <td>{{res.pronounce}}</td>
+            <td>{{res.additional}}</td>
+            <td onclick="getaudio({{ res.args }})">
+                <audio id="{{res.args}}"></audio>
+                <button>发音</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
 
-<div>
-    <ul>
-        {% if trans %}
-            {% for tran in trans %}
-                <li>{{ tran }}</li>
-            {% endfor %}
-        {% else %}
-            <li>没有查到</li>
-        {% endif %}
-    </ul>
+
+    {%endif%}
 </div>
-<div id="additional">
-    {% if additional %}
-        <p>
-            {{ additional }}
-        </p>
-    {% endif %}
-</div>
-<div id="pronounce">
-    {% if pronounce %}
-        <span id="doc">
-        {{ pronounce }}
-    </span>
-        <audio id="voice"></audio>
-        <p class="but">发音</p>
-    {% endif %}
-</div>
-<div>
-    <ul>
-        {% if query %}
-            {% for tran in query %}
-                <li>{{ tran.args }}</li>
-                <li>{{ tran.trans }}</li>
-                <li>{{ tran.pronounce }}</li>
-                <li>{{ tran.additional }}</li>
-            {% endfor %}
-        {% endif %}
-    </ul>
-</div>
+{% if page %}
+   {{page.links}}
+{% endif %}
 </body>
 <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 <script>
-    $(document).ready(function () {
+    function getaudio(args){
+        var voice = document.getElementById(args.value);
+        console.log(args);
+        args.setAttribute('src','http://dict.youdao.com/dictvoice?type=1&audio='+args.id);
+        if (args.paused) {
+            args.play();
+        }
+    }
+    $(document).ready(function() {
         var voice = document.getElementById('voice');
-        var doc = document.getElementById('ci').value;
-        console.log(doc);
-        voice.setAttribute('src', 'http://dict.youdao.com/dictvoice?audio=' + doc);
-        $('.but').click(function () {
+        var doc = document.getElementById('ci');
+		console.log(doc.value);
+        voice.setAttribute('src','http://dict.youdao.com/dictvoice?type=1&audio='+doc.value);
+          $('.but').click(function() {
             if (voice.paused) {
                 voice.play();
             }
         });
-    });
+     });
+
 </script>
 </html>
