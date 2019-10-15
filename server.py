@@ -3,12 +3,11 @@ import math
 import pymongo
 import requests
 from bs4 import BeautifulSoup
-from flask import Flask, render_template, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_paginate import get_page_parameter, Pagination
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 db_english = pymongo.MongoClient("127.0.0.1", 27017)["english"]
 col = db_english['danci']
 PER_PAGE = 13
@@ -23,23 +22,19 @@ def insert_mongo(query):
         col.insert(query)
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/api1/danci', methods=['GET', ])
 def index():
     if request.method == 'GET':
-        # page = int(request.args.get('page') or 1)
-        page = request.args.get(get_page_parameter(), type=int, default=1)
-        start = (page - 1) * PER_PAGE
-        pagination = Pagination(bs_version=3, page=page, total=col.count(), per_page_parameter=PER_PAGE)
-        result = list(col.find().sort('_id', 1).skip(start).limit(PER_PAGE))
-        return render_template('index.html', result=result, page=pagination)
-    elif request.method == 'POST':
-        args = request.form['ci'].strip()
+        args = request.args['ci'].strip()
         if args:
             result = [col.find_one({'args': args})]
-            if result:
-                return render_template('index.html', args=args, result=result)
+
+            if result[0] is not None:
+                for res in result:
+                    res["_id"] = str(res["_id"])
+
+                return jsonify({"code": 0, "data": result, "page_total": 1})
             else:
-                print(args)
                 url = "http://dict.youdao.com/w/" + args + "/"
                 soup = BeautifulSoup(requests.get(url).text, features="html.parser")
                 trans = soup.find('div', {'id': 'phrsListTab'}).find_all("ul", limit=1)[0]
@@ -56,15 +51,21 @@ def index():
                 query = {"args": args, "trans": trans, "pronounce": pronounce, "additional": additional}
                 insert_mongo(query)
 
-                return render_template('index.html', result=query)
+                result = [col.find_one({'args': args})]
+                for res in result:
+                   res["_id"] = str(res["_id"])
+                return jsonify({"code": 0, "data": result, "page_total": 1})
         else:
-            result = list(col.find().sort('_id', 1).limit(PER_PAGE))
-            pagination = Pagination(bs_version=3, page=1, total=col.count())
-            return render_template('index.html', result=result, page=pagination)
+            page = int(request.args.get('page') or 1)
+            start = (page - 1) * PER_PAGE
+            result = list(col.find().sort('_id', 1).skip(start).limit(PER_PAGE))
+            for res in result:
+                res["_id"] = str(res["_id"])
 
+            return jsonify({"code": 0, "data": result, "page_total": math.ceil(col.count()/13)})
     else:
-        return render_template('index.html')
+        return jsonify({"code": 200})
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
